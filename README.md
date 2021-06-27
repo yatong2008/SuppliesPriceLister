@@ -40,5 +40,6 @@ Both humphries.csv and megacorp.json contain lists of construction supplies and 
 * Please ask any questions you wish
 
 ##What can be improved in the project?
-Add Data Access Layer, which load the data from source, such as EntityFramework Connection or Mock Payload...
-Unit Tests
+* Add Data Access Layer, which load the data from source, such as EntityFramework Connection or Mock Payload...
+* Unit Tests
+* Can extract the Exchange Rate Converter to a seperate serivce, and more generic, which can be extended to different currency conversion
