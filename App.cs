@@ -44,7 +44,7 @@ namespace SuppliesPriceLister
 
             foreach (var listing in listings.OrderByDescending(x => x.PriceIdAud))
             {
-                Console.WriteLine("{0}, {1}, {2}", listing.Id, listing.Description, listing.PriceIdAud);
+                Console.WriteLine("{0}, {1}, ${2:0.00}", listing.Id, listing.Description, listing.PriceIdAud);
             }
         }
     }
