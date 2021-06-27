@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using SuppliesPriceLister.AutoMapper;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -78,6 +79,9 @@ namespace SuppliesPriceLister
 
             // Add app
             serviceCollection.AddTransient<App>();
+
+            serviceCollection.AddAutoMapperSetup();
+
         }
     }
 }
