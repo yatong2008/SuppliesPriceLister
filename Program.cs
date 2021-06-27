@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using SuppliesPriceLister.AutoMapper;
+using SuppliesPriceLister.Service;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -36,9 +37,6 @@ namespace SuppliesPriceLister
             // Create service provider
             Log.Information("Building service provider");
             IServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-
-            // Print connection string to demonstrate configuration object is populated
-            Console.WriteLine(configuration.GetConnectionString("DataConnection"));
 
             try
             {
