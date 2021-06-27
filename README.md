@@ -38,3 +38,7 @@ Both humphries.csv and megacorp.json contain lists of construction supplies and 
 * Be prepared to talk us through your thinking process & assumptions as you go.
 * Feel free to use any resources you would normally use (Google, StackOverflow etc.)
 * Please ask any questions you wish
+
+##What can be improved in the project?
+Add Data Access Layer, which load the data from source, such as EntityFramework Connection or Mock Payload...
+Unit Tests

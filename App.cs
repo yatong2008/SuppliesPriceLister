@@ -1,74 +1,48 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using AutoMapper;
-using CsvHelper;
+﻿using Microsoft.Extensions.Configuration;
 using SuppliesPriceLister.Entity;
+using SuppliesPriceLister.Service;
 using SuppliesPriceLister.ViewModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SuppliesPriceLister
 {
     public class App
     {
         private readonly IConfigurationRoot _config;
-        private readonly ILogger<App> _logger;
-        private readonly IMapper _mapper;
+        private readonly ICsvReaderService _csvReaderService;
+        private readonly IJsonReaderService _jsonReaderService;
 
-        public App(IConfigurationRoot config, ILoggerFactory loggerFactory, IMapper mapper)
+        public App(IConfigurationRoot config, ICsvReaderService csvReaderService, IJsonReaderService jsonReaderService)
         {
-            _logger = loggerFactory.CreateLogger<App>();
             _config = config;
-            _mapper = mapper;
+            _csvReaderService = csvReaderService;
+            _jsonReaderService = jsonReaderService;
         }
 
         public async Task Run()
         {
-            //read humphries.csv
-            var Listings = new List<ListingVm>();
+            var audUsdExchangeRate = _config.GetSection("audUsdExchangeRate").Get<double>();
+            var listings = new List<ListingVm>();
 
-            IEnumerable<HumphriesItem> humphriesItems;
+            var sources = _config.GetSection("sources").Get<List<FileSourceConfig>>();
 
-            using (var reader = new StreamReader("humphries.csv"))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            foreach (var source in sources)
             {
-                humphriesItems = csv.GetRecords<HumphriesItem>().ToList();
-
-                Listings.AddRange(humphriesItems.Select(humphriesItem => _mapper.Map<ListingVm>(humphriesItem)));
-            }
-
-            //read megacorp.json
-
-            var payload = File.ReadAllText("megacorp.json");
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                Converters = { new JsonStringEnumConverter() }
-            };
-            var megacorpData = JsonSerializer.Deserialize<PartnersContainer>(payload, options);
-
-            foreach (var megacorpDataPartner in megacorpData.Partners)
-            {
-                foreach (var supply in megacorpDataPartner.Supplies)
+                switch (source.FileType)
                 {
-                    Listings.Add(_mapper.Map<ListingVm>((supply, true, _config.GetSection("audUsdExchangeRate").Get<double>(), true)));
+                    case FileType.CSV:
+                        listings.AddRange(_csvReaderService.ReadFile(source.FileName, source.PriceInCents, source.Currency, audUsdExchangeRate));
+                        break;
+                    case FileType.JSON:
+                        listings.AddRange(_jsonReaderService.ReadFile(source.FileName, source.PriceInCents, source.Currency, audUsdExchangeRate));
+                        break;
                 }
-
-                //Listings.AddRange(megacorpDataPartner.Supplies.Select(supply => new ListingVm()
-                //{
-                //    Id = supply.Id,
-                //    Description = supply.Description,
-                //    PriceIdAud = Math.Round(supply.PriceInCents / 100.0 / _config.GetSection("audUsdExchangeRate").Get<double>(), 2)
-                //}));
             }
 
-            foreach (var listing in Listings.OrderByDescending(x => x.PriceIdAud))
+            foreach (var listing in listings.OrderByDescending(x => x.PriceIdAud))
             {
                 Console.WriteLine("{0}, {1}, {2}", listing.Id, listing.Description, listing.PriceIdAud);
             }

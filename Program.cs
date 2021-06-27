@@ -80,6 +80,8 @@ namespace SuppliesPriceLister
 
             serviceCollection.AddAutoMapperSetup();
 
+            serviceCollection.AddTransient<ICsvReaderService, CsvReaderService>();
+            serviceCollection.AddTransient<IJsonReaderService, JsonReaderService>();
         }
     }
 }
